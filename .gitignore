@@ -1,5 +1,3 @@
 .env
-node_modules/
 .venv/
-deploy/LightsailDefaultKey-eu-central-1.pem
 **/__pycache__
