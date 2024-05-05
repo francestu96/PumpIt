@@ -7,7 +7,11 @@ channels_config = [
 
     Channel('Crypto_Binance_Kucoin',
             cex_re='Exchange : ([A-Z]+)',            
-            ticker_re='^The coin we are pumping today is : ([A-Z]{2,6})$'),
+            ticker_re='(?i)^the coin we are pumping today is : ([a-z]{2,6})$'),
+
+    Channel('Pancake_Swap_Pumps',
+            cex_re='Exchange : ([A-Z]+)',            
+            ticker_re='(?i)^the coin we are pumping today is : ([a-z]{2,6})$'),
 
     Channel('pump_it_0', 
             cex_re='Exchange: ([a-zA-Z]+)[.][a-z]{3}', 

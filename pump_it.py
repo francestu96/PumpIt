@@ -47,6 +47,6 @@ with TelegramClient(StringSession(os.getenv('TELEGRAM_SESSION')), int(os.getenv(
         else:
             logging.log(logging.DEBUG, f'"{event.chat.username}" -> no info found in message: ' + event.message.message.replace('\n', ''))
 
-        logging.log(logging.DEBUG, 'Current channel_config -> ' + {[ f'Channel: {x.name}; Cex: {x.exchange}' for x in channels_config ]})
+        logging.log(logging.DEBUG, 'Current channel_config -> ' + str([ f'Channel: {x.name}; Cex: {x.exchange}' for x in channels_config ]))
 
     client.run_until_disconnected()
