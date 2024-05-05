@@ -33,14 +33,14 @@ with TelegramClient(StringSession(os.getenv('TELEGRAM_SESSION')), int(os.getenv(
                 logging.log(logging.ERROR, f'Exchange "{channel.exchange}" does not exist')
                 return
             
-            bought_tokens = cex.new_buy_order(token_ticker, os.getenv('AMOUNT'))
-            bought_price = float(os.getenv('AMOUNT')) / float(bought_tokens) 
-            profit = cex.new_sell_oco_order(token_ticker, bought_tokens, bought_price, float(os.getenv('TP')), float(os.getenv('SL')))
+            logging.log(logging.DEBUG, f'"{event.chat.username}" -> I would have bought {bought_tokens} {token_ticker} at {channel.exchange}')
             
-            if profit:
-                logging.log(logging.INFO, '"{0}" -> ticker: {1}/{2}; PROFIT: {:.2f}x'.format(event.chat.username, token_ticker, channel.exchange, profit))
-            else:
-                logging.log(logging.INFO, '"{0}" -> ticker: {1}/{2}; Final profit: OCO order placed, cannot look at profit'.format(event.chat.username, channel.exchange, token_ticker))
+            # TO UNCOMMENT!
+            # bought_tokens = cex.new_buy_order(token_ticker, os.getenv('AMOUNT'))
+            # bought_price = float(os.getenv('AMOUNT')) / float(bought_tokens) 
+            # profit = cex.new_sell_oco_order(token_ticker, bought_tokens, bought_price, float(os.getenv('TP')), float(os.getenv('SL')))
+            
+            # logging.log(logging.INFO, '"{0}" -> ticker: {1}/{2}; PROFIT: {:.2f}x'.format(event.chat.username, token_ticker, channel.exchange, profit))
 
             channel.exchange = None
 
