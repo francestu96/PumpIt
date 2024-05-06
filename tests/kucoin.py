@@ -1,7 +1,8 @@
+import sys
 from classes.ExchangeFactory import ExchangeFactory
 
 cex = ExchangeFactory('kucoin')
-token_ticker = 'TT'
+token_ticker = sys.argv[1].upper()
 
 amount = '5'
 tp = '2'
