@@ -3,6 +3,7 @@ import json
 import time
 import requests
 from kucoin.client import Trade
+from kucoin.client import Market
 from classes.Exchange import Exchange
 from websocket import create_connection
 
@@ -11,6 +12,11 @@ class Kucoin(Exchange):
         self.client = Trade(os.getenv('KUCOIN_API_KEY'), os.getenv('KUCOIN_API_SECRET'), os.getenv('KUCOIN_API_PASSPHRASE'))
 
     def new_buy_order(self, token_ticker, size):
+        market = Market(url='https://api.kucoin.com')
+        prev_kline = market.get_kline(token_ticker + '-USDT', '1min')[1]
+        if(float(prev_kline[2]) / float(prev_kline[1]) > 2):
+            raise Exception("SCAM")
+        
         order_creation = self.client.create_market_order(token_ticker + '-USDT', 'buy', funds=size)
         order = self.client.get_order_details(order_creation['orderId'])
         return order['dealSize']

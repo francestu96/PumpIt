@@ -1,4 +1,5 @@
 import os
+import pytz
 import asyncio
 import logging
 from dotenv import load_dotenv
@@ -9,7 +10,7 @@ from telethon.sync import TelegramClient, events
 from classes.ExchangeFactory import ExchangeFactory
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-
+logging.Formatter.converter = lambda *_: datetime.now(tz=pytz.timezone("Europe/Rome")).timetuple()
 logging.getLogger('telethon').setLevel(level=logging.INFO)
 logging.getLogger('asyncio').setLevel(level=logging.ERROR)
 logging.getLogger('tzlocal').setLevel(level=logging.ERROR)
@@ -20,8 +21,14 @@ logging.basicConfig(format='[ %(levelname) 5s - %(asctime)s ] %(name)s: %(messag
 
 def pump(channel, message):
     token_ticker = channel.get_ticker(message)
+    ch_exchange = channel.get_cex(message)
 
-    if token_ticker:
+    if ch_exchange:
+        logging.log(logging.INFO, f'"{channel.name}" -> found exchange: {ch_exchange}')
+        channel.exchange = ch_exchange
+        return
+
+    elif token_ticker:
         if channel.exchange is None:
             logging.log(logging.ERROR, f'No exchange found for: {channel.name}')
             return
@@ -36,16 +43,19 @@ def pump(channel, message):
         logging.log(logging.DEBUG, f'"{channel.name}" -> I would have bought {token_ticker} at {channel.exchange}')
         
         # TO UNCOMMENT!
-        # bought_tokens = cex.new_buy_order(token_ticker, os.getenv('AMOUNT'))
-        # bought_price = float(os.getenv('AMOUNT')) / float(bought_tokens) 
-        # profit = cex.new_sell_oco_order(token_ticker, bought_tokens, bought_price, float(os.getenv('TP')), float(os.getenv('SL')))
-        
-        # logging.log(logging.INFO, '"{0}" -> ticker: {1}/{2}; PROFIT: {:.2f}x'.format(channel.name, token_ticker, channel.exchange, profit))
+        # try:
+        #     bought_tokens = cex.new_buy_order(token_ticker, os.getenv('AMOUNT'))
+        #     bought_price = float(os.getenv('AMOUNT')) / float(bought_tokens) 
+        #     profit = cex.new_sell_oco_order(token_ticker, bought_tokens, bought_price, float(os.getenv('TP')), float(os.getenv('SL')))
+            
+        #     logging.log(logging.INFO, '"{0}" -> ticker: {1}/{2}; PROFIT: {:.2f}x'.format(channel.name, token_ticker, channel.exchange, profit))
+        # except Exception as e:
+        #     logging.log(logging.ERROR, f'{channel.name}: {token_ticker} {e}')
 
         channel.exchange = None
         return
 
-    logging.log(logging.DEBUG, f'"{channel.name}" -> no ticker found in message: ' + message.replace('\n', ''))
+    logging.log(logging.DEBUG, f'"{channel.name}" -> no ticker or excahnge found in message: ' + message.replace('\n', ''))
     logging.log(logging.DEBUG, 'Current channel_config -> ' + str([ f'Channel: {x.name}; Cex: {x.exchange}' for x in channels_config ]))
 
 async def ticker_polling(client, channel):
@@ -57,7 +67,6 @@ async def ticker_polling(client, channel):
         message = (await client.get_messages(channel.name, limit=1))[0]
         time_delta = datetime.now(timezone.utc) - message.date
         if time_delta.total_seconds() < read_message_for_sec:
-            logging.log(logging.INFO, f'{channel.name}: new message: {message.message}')
             pump(channel, message.message)
             return
 
@@ -72,7 +81,7 @@ async def main():
             ch_exchange = channel.get_cex(event.message.message)
 
             if ch_exchange:
-                logging.log(logging.INFO, f'"{event.chat.username}" -> exchange found in message: {ch_exchange}')
+                logging.log(logging.INFO, f'"{event.chat.username}" -> found exchange: {ch_exchange}')
                 channel.exchange = ch_exchange
                 return
             
