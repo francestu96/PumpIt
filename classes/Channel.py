@@ -8,15 +8,31 @@ class Channel:
         self.exchange = exchange
 
     def get_cex(self, message):
-        cex_re = re.search(self.cex_re, message) 
-        if cex_re:
-           return cex_re.group(1).lower()
+        match = re.findall(self.cex_re, message) 
+
+        if len(match) > 0:
+            if isinstance(match[0], str):
+                return match[0].lower()
+            
+            elif type(match[0]) is tuple:
+                for v in match[0]:
+                    if v: return v.lower() 
+            
+            raise Exception("Unable to parse exchange message corractly. Match found: " + str(match))
         
         return None
     
     def get_ticker(self, message):
-        ticker_re = re.search(self.ticker_re, message) 
-        if ticker_re:
-           return ticker_re.group(1)
+        match = re.findall(self.ticker_re, message)
+
+        if len(match) > 0:
+            if isinstance(match[0], str):
+                return match[0]
+            
+            elif type(match[0]) is tuple:
+                for v in match[0]:
+                    if v: return v 
+            
+            raise Exception("Unable to parse ticker message corractly. Match found: " + str(match))
         
         return None

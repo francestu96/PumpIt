@@ -6,7 +6,7 @@ token_ticker = sys.argv[1].upper()
 
 amount = '5'
 tp = '2'
-sl = '0.7'
+sl = '0.75'
 
 bought_tokens = cex.new_buy_order(token_ticker, amount)
 bought_price = float(amount) / float(bought_tokens) 
